@@ -1,0 +1,25 @@
+{
+  "name": "powerbutton",
+  "version": "1.0.0",
+  "description": "Power button for an aws machine of your choice",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stevefortier/powerbutton.git"
+  },
+  "keywords": [
+    "power",
+    "button",
+    "aws",
+    "instance"
+  ],
+  "author": "Steve Fortier",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stevefortier/powerbutton/issues"
+  },
+  "homepage": "https://github.com/stevefortier/powerbutton#readme"
+}
