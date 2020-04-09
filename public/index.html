@@ -1,9 +1,35 @@
 <html>
 <head>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<script>$.get( "status", function( data ) { $("#result").html( data ); });</script>
-</head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script>
+        $.get("status", function( data ) {
+            let status = "stopped";
+            if (data
+                && data["InstanceStatuses"]
+                && data["InstanceStatuses"].length > 0
+                && data["InstanceStatuses"][0]
+                && data["InstanceStatuses"][0]["InstanceState"]
+                && data["InstanceStatuses"][0]["InstanceState"]["Name"]) {
+
+                status = data["InstanceStatuses"][0]["InstanceState"]["Name"];
+            }
+
+            $(".status-text").html( status );
+            $(".status").removeClass().addClass("status").addClass(status);
+        });
+    </script>
+    </head>
 <body>
-	<div id="result" />
+    <div class="content">
+        <h1>Minecraft Server</h1>
+        <div class="status"><div class="status-text"></div></div>
+        <p>
+            <div class="button start">Start</div>
+            <div class="button stop">Stop</div>
+        </p>
+        <h2>Connect to the machine</h2>
+        <p><div class="command">ssh -i <a href="blah">minecraft.pem</a> ubuntu@minecraft.munchlax.net</div></p>
+    </div>
 </body>
 </html>

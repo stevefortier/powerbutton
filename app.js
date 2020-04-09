@@ -17,7 +17,7 @@ AWS.config.update({region: 'us-east-2'});
 var ec2 = new AWS.EC2({apiVersion: 'latest'});
 
 var params = {
-    InstanceIds: ["i-aslkdjaslkjdlskjd"]
+    InstanceIds: ["i-04695da5e3ec23fe4"]
 };
 
 let app = express();
@@ -42,8 +42,7 @@ app.get('/status', function(req, res) {
             content = JSON.stringify(data);
         }
 
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Type', 'application/json');
         res.end(content);
     });
 });

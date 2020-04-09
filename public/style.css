@@ -1,0 +1,66 @@
+
+html {
+    font-size: 200%;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+body {
+    background-color: black;
+}
+
+.content {
+    margin: 1rem;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 0.2rem;
+}
+
+.status {
+    position: relative;
+    width: 7rem;
+    height: 7rem;
+    display: inline-block;
+    background-color: lightgray;
+    text-transform: uppercase;
+}
+
+.status .status-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.status.running {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.status.stopped {
+    background-color: red;
+    color: white;
+}
+
+.button {
+    display: inline-block;
+    width: 9rem;
+    margin: 0.5rem;
+    padding: 1rem;
+    background-color: lightgray;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 0.2rem;
+}
+
+.button.start:hover {
+    background-color: #4CAF50;
+}
+
+.button.stop:hover {
+    background-color: red;
+}
+
+.button:hover {
+    color: white;
+}
