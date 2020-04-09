@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/stevefortier/powerbutton/issues"
   },
-  "homepage": "https://github.com/stevefortier/powerbutton#readme"
+  "homepage": "https://github.com/stevefortier/powerbutton#readme",
+  "dependencies": {
+    "aws-sdk": "^2.656.0"
+  }
 }
