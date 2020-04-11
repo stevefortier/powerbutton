@@ -3,33 +3,87 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
     <script>
-        $.get("status", function( data ) {
-            let status = "stopped";
-            if (data
-                && data["InstanceStatuses"]
-                && data["InstanceStatuses"].length > 0
-                && data["InstanceStatuses"][0]
-                && data["InstanceStatuses"][0]["InstanceState"]
-                && data["InstanceStatuses"][0]["InstanceState"]["Name"]) {
+        function updateStatus() {
+            $.get("server-status", function(status) {
+                $(".server-status .status-text").html(status);
+                $(".server").removeClass().addClass("server").addClass(status);
+            });
+            $.get("service-status", function(status) {
+                $(".service .status-text").html(status);
+                $(".service").removeClass().addClass("service").addClass(status);
+            });
+            $.get("logs", function(logs) {
+                $(".logs-content").html(logs);
+            });
+        }
 
-                status = data["InstanceStatuses"][0]["InstanceState"]["Name"];
-            }
+        $(document).ready(function() {
+            $.get("server-name", function(data) {
+                $(".server-name").html(data);
+            });
+            $.get("service-name", function(data) {
+                $(".service-name").html(data);
+            });
+            $.get("connect-instructions", function(data) {
+                $(".command").html(data);
+            });
 
-            $(".status-text").html( status );
-            $(".status").removeClass().addClass("status").addClass(status);
+            updateStatus();
+            $(".power.button.start").click(function() {
+                $.get("boot", function(data) {
+                    updateStatus();
+                });
+            });
+            $(".power.button.stop").click(function() {
+                if (confirm("This will shutdown the machine. Are you sure?")) {
+                    $.get("shutdown", function(data) {
+                        updateStatus();
+                    });
+                }
+            });
+            $(".console.button.start").click(function() {
+                $.get("start", function(data) {
+                });
+            });
+            $(".console.button.stop").click(function() {
+                if (confirm("This will request the process to stop. Are you sure?")) {
+                    $.get("stop", function(data) {
+                        updateStatus();
+                    });
+                }
+            });
+            setInterval(updateStatus, 5000);
         });
     </script>
     </head>
-<body>
-    <div class="content">
-        <h1>Minecraft Server</h1>
-        <div class="status"><div class="status-text"></div></div>
+    <body>
+    <div class="server">
+        <h1 class="server-name">Server</h1>
+        <div class="server-status status"><div class="status-text">Unknown</div></div>
         <p>
-            <div class="button start">Start</div>
-            <div class="button stop">Stop</div>
+            <div class="power button start">Boot</div>
+            <div class="power button stop">Shutdown</div>
         </p>
-        <h2>Connect to the machine</h2>
-        <p><div class="command">ssh -i <a href="blah">minecraft.pem</a> ubuntu@minecraft.munchlax.net</div></p>
+        <div class="service">
+            <h2 class="service-name">Service</h2>
+            <div class="service-status status"><div class="status-text"></div></div>
+            <p>
+                <div class="console button start">Start</div>
+                <div class="console button stop">Stop</div>
+            </p>
+            <div class="logs-window">
+                <div class="logs-content-container">
+                    <div class="logs-content">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="connect">
+            <h2>Connect to the machine</h2>
+            <div class="command"></div>
+            <p class="note">Note 1 : Commands issued through ssh won't display in the view above</p>
+            <p class="note">Note 2 : You will want to run <b>chmod 400</b> on the file if you get the unprotected private key file warning.</p>
+        </div>
     </div>
 </body>
 </html>

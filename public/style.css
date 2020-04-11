@@ -1,6 +1,6 @@
 
 html {
-    font-size: 200%;
+    font-size: 100%;
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
 }
@@ -9,9 +9,10 @@ body {
     background-color: black;
 }
 
-.content {
+.server {
     margin: 1rem;
     padding: 1rem;
+    padding-bottom: 2rem;
     background-color: white;
     border-radius: 0.2rem;
 }
@@ -19,10 +20,11 @@ body {
 .status {
     position: relative;
     width: 7rem;
-    height: 7rem;
+    height: 2rem;
     display: inline-block;
     background-color: lightgray;
     text-transform: uppercase;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .status .status-text {
@@ -32,39 +34,144 @@ body {
     transform: translate(-50%, -50%);
 }
 
-.status.running {
+.server.pending .server-status {
+    background-color: cornflowerblue;
+    color: white;
+}
+.server.running .server-status {
     background-color: #4CAF50;
     color: white;
 }
+.server.stopping .server-status {
+    background-color: yellow;
+    color: black;
+}
+.server.stopped .server-status {
+    background-color: red;
+    color: white;
+}
 
-.status.stopped {
+.service.pending .service-status {
+    background-color: cornflowerblue;
+    color: white;
+}
+.service.running .service-status {
+    background-color: #4CAF50;
+    color: white;
+}
+.service.stopping .service-status {
+    background-color: yellow;
+    color: black;
+}
+.service.stopped .service-status {
     background-color: red;
     color: white;
 }
 
 .button {
     display: inline-block;
-    width: 9rem;
+    width: 5rem;
     margin: 0.5rem;
-    padding: 1rem;
+    padding: 0.5rem;
     background-color: lightgray;
     cursor: pointer;
     text-align: center;
     border-radius: 0.2rem;
 }
+.power.button {
+    display: none;
+}
+.server.stopped .power.button.start {
+    display: inline-block;
+}
+.server.running .power.button.stop {
+    display: inline-block;
+}
+
+.console.button {
+    display: none;
+}
+.service.running .console.button.stop {
+    display: inline-block;
+}
+.service.stop-requested .console.button.kill {
+    display: inline-block;
+}
+.service.running .console.button.restart {
+    display: inline-block;
+}
+.service.stopped .console.button.start {
+    display: inline-block;
+}
+
 
 .button.start:hover {
     background-color: #4CAF50;
 }
-
+.button.restart:hover {
+    background-color: orange;
+}
 .button.stop:hover {
     background-color: red;
 }
-
 .button:hover {
     color: white;
 }
 
+.connect {
+    display: none;
+}
+.running .connect {
+    display: inline;
+}
+
 .command {
     font-family: 'Monaco', monospace;
+}
+
+.note {
+    font-size: 0.8em;
+}
+
+.service {
+    display: none;
+}
+.running .service {
+    display: inline;
+}
+
+.logs-window {
+    display: inline-block;
+    position: relative;
+    width: 90%;
+    height: 30rem;
+    background-color: black;
+    background-image: radial-gradient(rgba(0, 50, 0, 0.75), black 120%);
+    padding: 1rem;
+    font: 1rem Inconsolata, monospace;
+    color: white;
+    text-align: left;
+    text-shadow: 0 0 5px #C8C8C8;
+    border-radius: 0.2rem;
+    opacity: 0.5;
+}
+.service.running .logs-window {
+    opacity: 1.0;
+}
+
+.logs-content-container {
+    position: absolute;
+    width: 95%;
+    height: 30rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow-wrap: break-word;
+    overflow: hidden;
+}
+
+.logs-content {
+    position: absolute;
+    width: 100%;
+    bottom: 0%;
 }
