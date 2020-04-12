@@ -39,6 +39,7 @@
         $(document).ready(function() {
             $.get("server-name", function(data) {
                 $(".server-name").html(data);
+                document.title = data;
             });
             $.get("service-name", function(data) {
                 $(".service-name").html(data);
