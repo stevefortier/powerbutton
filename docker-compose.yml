@@ -20,6 +20,7 @@ services:
     ports:
       - "80:80"
     volumes:
+      - ./secrets:/secrets
       - ./nginx-conf:/etc/nginx/conf.d
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
