@@ -20,7 +20,7 @@ body {
 .status {
     padding: 0.5rem;
     position: relative;
-    width: 7rem;
+    width: 8rem;
     display: inline-block;
     background-color: lightgray;
     text-transform: uppercase;
@@ -28,6 +28,7 @@ body {
 }
 .status .status-text {
     position: inline-block;
+    font-size: 150%;
 }
 
 .status-countdown {

@@ -7,5 +7,5 @@
     "instanceSshPemFile": "secrets/minecraft.pem",
     "instanceSshConnectTimeout": 4000,
     "instanceId": "i-04695da5e3ec23fe4",
-    "instanceInactivityTimeout": 60000
+    "instanceInactivityTimeout": 3600000
 }
