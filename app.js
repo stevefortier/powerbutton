@@ -42,15 +42,17 @@ function getOpenSshSession(callbackSuccess, callbackError) {
     });
 }
 
-function remoteExec(command, logsOut, callbackSuccess, callbackError) {
+function remoteExec(command, logsOut, callbackSuccess, callbackError, callbackNewLog = null) {
     getOpenSshSession(
         function(ssh) {
             ssh.exec(command, [], {
                 cwd: '/home/ubuntu',
                 onStdout(chunk) {
+                    if (callbackNewLog != null) { callbackNewLog(chunk); }
                     if (logsOut != null) { logsOut.push(chunk.toString('utf8')); }
                 },
                 onStderr(chunk) {
+                    if (callbackNewLog != null) { callbackNewLog(chunk); }
                     if (logsOut != null) { logsOut.push(chunk.toString('utf8')); }
                 },
             }).then(function() {
@@ -104,7 +106,7 @@ app.get('/boot', function(req, res) {
     });
 });
 
-app.get('/shutdown', function(req, res) {
+function shutdown(resultCallback) {
     ec2.stopInstances({ InstanceIds: [config['instanceId']] }, function(err, data) {
         let content = ""
         if (err){
@@ -116,6 +118,12 @@ app.get('/shutdown', function(req, res) {
             content = JSON.stringify(data);
         }
 
+        resultCallback(content);
+
+    });
+}
+app.get('/shutdown', function(req, res) {
+    shutdown(function(result) {
         res.setHeader('Content-Type', 'application/json');
         res.end(content);
     });
@@ -128,6 +136,7 @@ app.get('/service-status', function(req, res) {
 });
 
 app.get('/start', function(req, res) {
+    postponeShutdown();
     remoteExec('./start.sh', null,
         function(output) {
             res.setHeader('Content-Type', 'plain/text');
@@ -170,6 +179,25 @@ app.get('/connect-instructions', function(req, res) {
         config['instanceSshUsername'] + '@' + config['instanceSshHost']);
 })
 
+let lastReceivedLogTimeStamp = Date.now();
+function postponeShutdown() {
+    lastReceivedLogTimeStamp = Date.now();
+}
+function timeBeforeShutdown() {
+    if (serverStatus == "running") {
+        return lastReceivedLogTimeStamp + config['instanceInactivityTimeout'] - Date.now();
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+app.get('/server-shutdown-countdown', function(req, res) {
+    res.setHeader('Content-Type', 'plain/text');
+    res.end(timeBeforeShutdown().toString());
+})
+
 app.get('/' + path.basename(config['instanceSshPemFile']), function(req, res) {
     res.download(config['instanceSshPemFile'], path.basename(config['instanceSshPemFile']));
 });
@@ -190,7 +218,8 @@ function readLogs() {
   return new Promise(resolve => {
     remoteExec('./logs.sh', logs,
         function(output) { resolve(output); },
-        function(error) { resolve(""); }
+        function(error) { resolve(""); },
+        function(newLog) { postponeShutdown(); }
     );
   });
 }
@@ -203,7 +232,12 @@ async function monitorServerForever() {
     while (true) {
         await fetchServerStatus().then(function(status){ serverStatus = status; } );
         if (serverStatus == "running") {
-            await fetchServiceStatus().then(function(status) { serviceStatus = status; });
+            if (timeBeforeShutdown() > 0) {
+                await fetchServiceStatus().then(function(status) { serviceStatus = status; });
+            }
+            else {
+                await new Promise(resolve => { shutdown(function(result) { resolve(); }); });
+            }
         }
         else {
             serviceStatus = "stopped";

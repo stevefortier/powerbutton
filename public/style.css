@@ -18,20 +18,23 @@ body {
 }
 
 .status {
+    padding: 0.5rem;
     position: relative;
     width: 7rem;
-    height: 2rem;
     display: inline-block;
     background-color: lightgray;
     text-transform: uppercase;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-
 .status .status-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: inline-block;
+}
+
+.status-countdown {
+    display: none;
+}
+.server.running .status-countdown {
+    display: inline-block;
 }
 
 .server.pending .server-status {

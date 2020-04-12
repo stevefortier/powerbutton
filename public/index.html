@@ -4,10 +4,23 @@
     <link rel="shortcut icon" href="images/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="style.css">
     <script>
+        function msToTime(s) {
+            var ms = s % 1000;
+            s = (s - ms) / 1000;
+            var secs = s % 60;
+            s = (s - secs) / 60;
+            var mins = s % 60;
+            var hrs = (s - mins) / 60;
+            return hrs + ':' + mins + ':' + secs;
+        }
+
         function updateStatus() {
             $.get("server-status", function(status) {
                 $(".server-status .status-text").html(status);
                 $(".server").removeClass().addClass("server").addClass(status);
+            });
+            $.get("server-shutdown-countdown", function(countdown) {
+                $(".status-countdown").html(msToTime(countdown));
             });
             $.get("service-status", function(status) {
                 $(".service .status-text").html(status);
@@ -60,7 +73,10 @@
     <body>
     <div class="server">
         <h1 class="server-name">Server</h1>
-        <div class="server-status status"><div class="status-text">Unknown</div></div>
+        <div class="server-status status">
+            <div class="status-text">Unknown</div>
+            <div class="status-countdown"></div>
+        </div>
         <p>
             <div class="power button start">Boot</div>
             <div class="power button stop">Shutdown</div>
