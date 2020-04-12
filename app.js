@@ -1,6 +1,7 @@
 const aws = require("aws-sdk");
 const circular_buffer = require("circular-buffer");
 const config = require('./config.json')
+const favicon = require('serve-favicon');
 const fs = require('fs');
 const http = require('http');
 const express = require('express');
@@ -59,6 +60,8 @@ function remoteExec(command, logsOut, callbackSuccess, callbackError) {
 let app = express();
 
 app.use(express.static('public'));
+
+app.use(favicon('public/images/favicon.ico'));
 
 app.get('/server-name', function(req, res) {
     res.setHeader('Content-Type', 'text/plain');
