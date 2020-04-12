@@ -4,6 +4,11 @@
     <link rel="shortcut icon" href="images/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="style.css">
     <script>
+        function pad(n, width, z) {
+          z = z || '0';
+          n = n + '';
+          return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+        }
         function msToTime(s) {
             var ms = s % 1000;
             s = (s - ms) / 1000;
@@ -11,7 +16,7 @@
             s = (s - secs) / 60;
             var mins = s % 60;
             var hrs = (s - mins) / 60;
-            return hrs + ':' + mins + ':' + secs;
+            return pad(hrs, 2) + ':' + pad(mins, 2) + ':' + pad(secs, 2);
         }
 
         function updateStatus() {
