@@ -1,40 +1,24 @@
-const AWS = require("aws-sdk");
+const aws = require("aws-sdk");
 const circular_buffer = require("circular-buffer");
+const config = require('./config.json')
 const fs = require('fs');
 const http = require('http');
 const express = require('express');
 const node_ssh = require('node-ssh');
 const path = require('path');
 
-const appConfig = {
-    port: 3000,
-    title: 'minecraft.munchlax.net:25780',
-    serviceName: 'Minecraft Server',
-    instanceSshHost: 'minecraft.munchlax.net',
-    instanceSshUsername: 'ubuntu',
-    instanceSshPemFile: '/home/stevefortier/Downloads/minecraft.pem',
-    instanceSshConnectTimeout: 4000,
-    instanceRegion: 'us-east-2',
-    instanceId: 'i-04695da5e3ec23fe4'
-}
-
-AWS.config.getCredentials(function(err) {
-    if (err) {
-        console.log("Error discovering AWS credentials", err.stack);
-    }
-});
-AWS.config.update({region: appConfig.instanceRegion});
-let ec2 = new AWS.EC2({apiVersion: 'latest'});
+aws.config.loadFromPath(config['awsConfigFile']);
+let ec2 = new aws.EC2({apiVersion: 'latest'});
 
 let ssh = null;
 function getOpenSshSession(callbackSuccess, callbackError) {
     if (ssh == null || ssh.connection == null) {
         ssh = new node_ssh();
         ssh.connect({
-           host: appConfig.instanceSshHost,
-           username: appConfig.instanceSshUsername,
-           privateKey: fs.readFileSync(appConfig.instanceSshPemFile, 'utf8'),
-           readyTimeout: appConfig.instanceSshConnectTimeout
+           host: config['instanceSshHost'],
+           username: config['instanceSshUsername'],
+           privateKey: fs.readFileSync(config['instanceSshPemFile'], 'utf8'),
+           readyTimeout: config['instanceSshConnectTimeout']
         })
         .then(function() {
             if (ssh.connection != null) {
@@ -78,16 +62,16 @@ app.use(express.static('public'));
 
 app.get('/server-name', function(req, res) {
     res.setHeader('Content-Type', 'text/plain');
-    res.end(appConfig.title);
+    res.end(config['title']);
 });
 
 app.get('/service-name', function(req, res) {
     res.setHeader('Content-Type', 'text/plain');
-    res.end(appConfig.serviceName);
+    res.end(config['serviceName']);
 });
 
 app.get('/server-status', function(req, res) {
-    ec2.describeInstances({ InstanceIds: [appConfig.instanceId] }, function(err, data) {
+    ec2.describeInstances({ InstanceIds: [config['instanceId']] }, function(err, data) {
         let content = ""
         if (err){
             console.log(err, err.stack);
@@ -104,7 +88,7 @@ app.get('/server-status', function(req, res) {
 });
 
 app.get('/boot', function(req, res) {
-    ec2.startInstances({ InstanceIds: [appConfig.instanceId] }, function(err, data) {
+    ec2.startInstances({ InstanceIds: [config['instanceId']] }, function(err, data) {
         let content = ""
         if (err){
             console.log(err, err.stack);
@@ -121,7 +105,7 @@ app.get('/boot', function(req, res) {
 });
 
 app.get('/shutdown', function(req, res) {
-    ec2.stopInstances({ InstanceIds: [appConfig.instanceId] }, function(err, data) {
+    ec2.stopInstances({ InstanceIds: [config['instanceId']] }, function(err, data) {
         let content = ""
         if (err){
             console.log(err, err.stack);
@@ -190,13 +174,13 @@ app.get('/kill', function(req, res) {
 
 app.get('/connect-instructions', function(req, res) {
     res.setHeader('Content-Type', 'plain/text');
-    res.end('ssh -i <a href="' + path.basename(appConfig.instanceSshPemFile) + '">' +
-        path.basename(appConfig.instanceSshPemFile) + '</a> ' +
-        appConfig.instanceSshUsername + '@' + appConfig.instanceSshHost);
+    res.end('ssh -i <a href="' + path.basename(config['instanceSshPemFile']) + '">' +
+        path.basename(config['instanceSshPemFile']) + '</a> ' +
+        config['instanceSshUsername'] + '@' + config['instanceSshHost']);
 })
 
-app.get('/' + path.basename(appConfig.instanceSshPemFile), function(req, res) {
-    res.download(appConfig.instanceSshPemFile, path.basename(appConfig.instanceSshPemFile));
+app.get('/' + path.basename(config['instanceSshPemFile']), function(req, res) {
+    res.download(config['instanceSshPemFile'], path.basename(config['instanceSshPemFile']));
 });
 
 // Fetch logs from the server
@@ -224,6 +208,5 @@ function sleep(ms) {
 }
 readLogsForever();
 
-
 // Launch the server
-let server = app.listen(appConfig.port);
+let server = app.listen(3000);
