@@ -7,31 +7,39 @@ const http = require('http');
 const express = require('express');
 const node_ssh = require('node-ssh');
 const path = require('path');
+const async_mutex = require('async-mutex');
 
 aws.config.loadFromPath(config['awsConfigFile']);
 let ec2 = new aws.EC2({apiVersion: 'latest'});
 
 let ssh = null;
+const sshConnectionMutex = new async_mutex.Mutex();
 function getOpenSshSession(callbackSuccess, callbackError) {
-    if (ssh == null || ssh.connection == null) {
-        ssh = new node_ssh();
-        ssh.connect({
-           host: config['instanceSshHost'],
-           username: config['instanceSshUsername'],
-           privateKey: fs.readFileSync(config['instanceSshPemFile'], 'utf8'),
-           readyTimeout: config['instanceSshConnectTimeout']
-        })
-        .then(function() {
-            if (ssh.connection != null) {
-                callbackSuccess(ssh);
-            }
-        }).catch(error => {
-            callbackError(error)
-        });
-    }
-    else {
-        callbackSuccess(ssh);
-    }
+    sshConnectionMutex.acquire()
+    .then(function(release) {
+        if (ssh == null || ssh.connection == null) {
+            ssh = new node_ssh();
+            ssh.connect({
+               host: config['instanceSshHost'],
+               username: config['instanceSshUsername'],
+               privateKey: fs.readFileSync(config['instanceSshPemFile'], 'utf8'),
+               readyTimeout: config['instanceSshConnectTimeout']
+            })
+            .then(function() {
+                if (ssh.connection != null) {
+                    callbackSuccess(ssh);
+                    release();
+                }
+            }).catch(error => {
+                callbackError(error)
+                release();
+            });
+        }
+        else {
+            callbackSuccess(ssh);
+            release();
+        }
+    });
 }
 
 function remoteExec(command, logsOut, callbackSuccess, callbackError) {
@@ -73,21 +81,10 @@ app.get('/service-name', function(req, res) {
     res.end(config['serviceName']);
 });
 
+let serverStatus = 'unknown'
 app.get('/server-status', function(req, res) {
-    ec2.describeInstances({ InstanceIds: [config['instanceId']] }, function(err, data) {
-        let content = ""
-        if (err){
-            console.log(err, err.stack);
-            content = "error"
-        }
-        else {
-            content = data["Reservations"][0]["Instances"][0]["State"]["Name"];
-            content = content;
-        }
-
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(content);
-    });
+    res.setHeader('Content-Type', 'text/plain');
+    res.end(serverStatus);
 });
 
 app.get('/boot', function(req, res) {
@@ -124,19 +121,10 @@ app.get('/shutdown', function(req, res) {
     });
 });
 
+let serviceStatus = 'unknown';
 app.get('/service-status', function(req, res) {
-    let statusLogs = new circular_buffer(100);
-    remoteExec('./status.sh', statusLogs,
-        function(output) {
-            res.setHeader('Content-Type', 'plain/text');
-            res.end(statusLogs.toarray().join(''));
-        },
-        function(error) {
-            console.log(error);
-            res.setHeader('Content-Type', 'plain/text');
-            res.end('unknown');
-        }
-    );
+    res.setHeader('Content-Type', 'plain/text');
+    res.end(serviceStatus);
 });
 
 app.get('/start', function(req, res) {
@@ -210,6 +198,48 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 readLogsForever();
+
+async function monitorServerForever() {
+    while (true) {
+        await fetchServerStatus().then(function(status){ serverStatus = status; } );
+        if (serverStatus == "running") {
+            await fetchServiceStatus().then(function(status) { serviceStatus = status; });
+        }
+        else {
+            serviceStatus = "stopped";
+        }
+        await sleep(3000);
+    }
+}
+function fetchServerStatus() {
+  return new Promise(resolve => {
+    ec2.describeInstances({ InstanceIds: [config['instanceId']] }, function(err, data) {
+        let content = ""
+        if (err){
+            content = "error"
+        }
+        else {
+            content = data["Reservations"][0]["Instances"][0]["State"]["Name"];
+            content = content;
+        }
+        resolve(content);
+    });
+  });
+}
+function fetchServiceStatus() {
+  return new Promise(resolve => {
+    let statusLogs = new circular_buffer(100);
+    remoteExec('./status.sh', statusLogs,
+        function(output) {
+            resolve(statusLogs.toarray().join(''));
+        },
+        function(error) {
+            resolve('unknown');
+        }
+    );
+  });
+}
+monitorServerForever();
 
 // Launch the server
 let server = app.listen(3000);

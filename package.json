@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/stevefortier/powerbutton#readme",
   "dependencies": {
+    "async-mutex": "^0.2.1",
     "aws-sdk": "^2.656.0",
     "circular-buffer": "^1.0.2",
     "express": "^4.17.1",
