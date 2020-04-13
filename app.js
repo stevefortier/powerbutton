@@ -137,7 +137,6 @@ app.get('/service-status', function(req, res) {
 
 app.get('/service-nbr-users', function(req, res) {
     res.setHeader('Content-Type', 'plain/text');
-    console.log (serviceUsers);
     res.end(serviceUsers.toString());
 });
 
@@ -239,11 +238,11 @@ async function monitorServerForever() {
         if (serverStatus == "running") {
             if (timeBeforeShutdown() > 0) {
                 await fetchServiceStatus().then(function(status) { serviceStatus = status; });
-                await fetchMinecraftStats().then(function(nbrPlayers) { 
+                await fetchMinecraftStats().then(function(nbrPlayers) {
                     serviceUsers = nbrPlayers;
                     if (serviceUsers > 0) {
                         postponeShutdown();
-                    } 
+                    }
                 });
             }
             else {
@@ -253,7 +252,7 @@ async function monitorServerForever() {
         else {
             serviceStatus = "stopped";
         }
-        await sleep(3000);
+        await sleep(5000);
     }
 }
 function fetchServerStatus() {
