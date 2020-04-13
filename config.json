@@ -2,6 +2,8 @@
     "title": "minecraft.munchlax.net:25780",
     "serviceName": "Minecraft Server",
     "awsConfigFile": "secrets/awsConfig.json",
+    "minecraftHost": "minecraft.munchlax.net",
+    "minecraftPort": 25780,
     "instanceSshHost": "minecraft.munchlax.net",
     "instanceSshUsername": "ubuntu",
     "instanceSshPemFile": "secrets/minecraft.pem",

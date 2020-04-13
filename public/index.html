@@ -25,11 +25,14 @@
                 $(".server").removeClass().addClass("server").addClass(status);
             });
             $.get("server-shutdown-countdown", function(countdown) {
-                $(".status-countdown").html(msToTime(countdown));
+                $(".server-status .status-countdown").html(msToTime(countdown));
             });
             $.get("service-status", function(status) {
                 $(".service .status-text").html(status);
                 $(".service").removeClass().addClass("service").addClass(status);
+            });
+            $.get("service-nbr-users", function(users) {
+                $(".service .status-users-text").html("Players : " + users);
             });
             $.get("logs", function(logs) {
                 $(".logs-content").html(logs);
@@ -89,7 +92,10 @@
         </p>
         <div class="service">
             <h2 class="service-name">Service</h2>
-            <div class="service-status status"><div class="status-text"></div></div>
+            <div class="service-status status">
+                <div class="status-text"></div>
+                <div class="status-users-text"></div>
+            </div>
             <p>
                 <div class="console button start">Start</div>
                 <div class="console button stop">Stop</div>

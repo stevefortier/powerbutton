@@ -1,13 +1,14 @@
+const async_mutex = require('async-mutex');
 const aws = require("aws-sdk");
 const circular_buffer = require("circular-buffer");
 const config = require('./config.json')
+const express = require('express');
 const favicon = require('serve-favicon');
 const fs = require('fs');
 const http = require('http');
-const express = require('express');
+const minecraft_ping = require('minecraft-server-util');
 const node_ssh = require('node-ssh');
 const path = require('path');
-const async_mutex = require('async-mutex');
 
 aws.config.loadFromPath(config['awsConfigFile']);
 let ec2 = new aws.EC2({apiVersion: 'latest'});
@@ -42,17 +43,15 @@ function getOpenSshSession(callbackSuccess, callbackError) {
     });
 }
 
-function remoteExec(command, logsOut, callbackSuccess, callbackError, callbackNewLog = null) {
+function remoteExec(command, logsOut, callbackSuccess, callbackError) {
     getOpenSshSession(
         function(ssh) {
             ssh.exec(command, [], {
                 cwd: '/home/ubuntu',
                 onStdout(chunk) {
-                    if (callbackNewLog != null) { callbackNewLog(chunk); }
                     if (logsOut != null) { logsOut.push(chunk.toString('utf8')); }
                 },
                 onStderr(chunk) {
-                    if (callbackNewLog != null) { callbackNewLog(chunk); }
                     if (logsOut != null) { logsOut.push(chunk.toString('utf8')); }
                 },
             }).then(function() {
@@ -130,9 +129,16 @@ app.get('/shutdown', function(req, res) {
 });
 
 let serviceStatus = 'unknown';
+let serviceUsers = 0;
 app.get('/service-status', function(req, res) {
     res.setHeader('Content-Type', 'plain/text');
     res.end(serviceStatus);
+});
+
+app.get('/service-nbr-users', function(req, res) {
+    res.setHeader('Content-Type', 'plain/text');
+    console.log (serviceUsers);
+    res.end(serviceUsers.toString());
 });
 
 app.get('/start', function(req, res) {
@@ -179,13 +185,13 @@ app.get('/connect-instructions', function(req, res) {
         config['instanceSshUsername'] + '@' + config['instanceSshHost']);
 })
 
-let lastReceivedLogTimeStamp = Date.now();
+let lastReceivedPostponeTimeStamp = Date.now();
 function postponeShutdown() {
-    lastReceivedLogTimeStamp = Date.now();
+    lastReceivedPostponeTimeStamp = Date.now();
 }
 function timeBeforeShutdown() {
     if (serverStatus == "running") {
-        return lastReceivedLogTimeStamp + config['instanceInactivityTimeout'] - Date.now();
+        return lastReceivedPostponeTimeStamp + config['instanceInactivityTimeout'] - Date.now();
     }
     else
     {
@@ -219,7 +225,6 @@ function readLogs() {
     remoteExec('./logs.sh', logs,
         function(output) { resolve(output); },
         function(error) { resolve(""); },
-        function(newLog) { postponeShutdown(); }
     );
   });
 }
@@ -234,6 +239,12 @@ async function monitorServerForever() {
         if (serverStatus == "running") {
             if (timeBeforeShutdown() > 0) {
                 await fetchServiceStatus().then(function(status) { serviceStatus = status; });
+                await fetchMinecraftStats().then(function(nbrPlayers) { 
+                    serviceUsers = nbrPlayers;
+                    if (serviceUsers > 0) {
+                        postponeShutdown();
+                    } 
+                });
             }
             else {
                 await new Promise(resolve => { shutdown(function(result) { resolve(); }); });
@@ -272,6 +283,18 @@ function fetchServiceStatus() {
         }
     );
   });
+}
+function fetchMinecraftStats() {
+    return new Promise(resolve => {
+        minecraft_ping(config['minecraftHost'], parseInt(config['minecraftPort']), { connectTimeout: 3000 }, (error, response) => {
+            if (error) {
+                resolve(0);
+            }
+            else {
+                resolve(response['onlinePlayers']);
+            }
+        });
+    });
 }
 monitorServerForever();
 

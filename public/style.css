@@ -72,6 +72,13 @@ body {
     color: white;
 }
 
+.status-users-text {
+    display: none;
+}
+.service.running .status-users-text {
+    display: inline-block;
+}
+
 .button {
     display: inline-block;
     width: 5rem;
