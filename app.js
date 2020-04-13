@@ -90,6 +90,7 @@ app.get('/server-status', function(req, res) {
 
 app.get('/boot', function(req, res) {
     postponeShutdown();
+    serviceStatus = 'unknown';
     ec2.startInstances({ InstanceIds: [config['instanceId']] }, function(err, data) {
         let content = ""
         if (err){
@@ -238,6 +239,8 @@ async function monitorServerForever() {
                     if (serviceUsers > 0) {
                         postponeShutdown();
                     }
+                }).catch(error => {
+                    // Do nothing
                 });
             }
             else {
