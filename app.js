@@ -89,6 +89,7 @@ app.get('/server-status', function(req, res) {
 });
 
 app.get('/boot', function(req, res) {
+    postponeShutdown();
     ec2.startInstances({ InstanceIds: [config['instanceId']] }, function(err, data) {
         let content = ""
         if (err){
