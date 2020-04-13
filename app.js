@@ -189,13 +189,7 @@ function postponeShutdown() {
     lastReceivedPostponeTimeStamp = Date.now();
 }
 function timeBeforeShutdown() {
-    if (serverStatus == "running") {
-        return lastReceivedPostponeTimeStamp + config['instanceInactivityTimeout'] - Date.now();
-    }
-    else
-    {
-        return 0;
-    }
+    return lastReceivedPostponeTimeStamp + config['instanceInactivityTimeout'] - Date.now();
 }
 
 app.get('/server-shutdown-countdown', function(req, res) {
