@@ -34,7 +34,7 @@ body {
 .status-countdown {
     display: none;
 }
-.server.running.no-users .status-countdown {
+.server.running .status-countdown.no-users {
     display: inline-block;
 }
 

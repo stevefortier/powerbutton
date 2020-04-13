@@ -34,10 +34,10 @@
             $.get("service-nbr-users", function(users) {
                 $(".service .status-users-text").html("Players : " + users);
                 if (users == "0") {
-                    $(".server").addClass("no-users");
+                    $(".status-countdown").addClass("no-users");
                 }
                 else {
-                    $(".server").removeClass("no-users");
+                    $(".status-countdown").removeClass("no-users");
                 }
             });
             $.get("logs", function(logs) {
