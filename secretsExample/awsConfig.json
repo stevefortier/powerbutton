@@ -1,5 +1,5 @@
 {
-	"accessKeyId": "MY_ACCESS_KEY", 
-	"secretAccessKey": "MY_SECRET_ACCESS_KEY", 
+	"accessKeyId": "MY_ACCESS_KEY",
+	"secretAccessKey": "MY_SECRET_ACCESS_KEY",
 	"region": "MY_REGION"
 }
