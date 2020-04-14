@@ -27,7 +27,7 @@
     "aws-sdk": "^2.656.0",
     "circular-buffer": "^1.0.2",
     "express": "^4.17.1",
-    "minecraft-server-util": "git+https://github.com/stevefortier/Minecraft-Ping.git",
+    "minecraft-server-util": "https://github.com/stevefortier/Minecraft-Ping.git",
     "node-ssh": "^8.0.0",
     "path": "^0.12.7",
     "serve-favicon": "^2.5.0"
