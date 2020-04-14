@@ -126,7 +126,7 @@ function shutdown(resultCallback) {
 app.get('/shutdown', function(req, res) {
     shutdown(function(result) {
         res.setHeader('Content-Type', 'application/json');
-        res.end(content);
+        res.end("");
     });
 });
 
