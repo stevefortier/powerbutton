@@ -6,7 +6,8 @@ When the machine is not used for a while, it will be shut down automatically.
 **On the machine you will use as the power button**
 1. `git clone https://github.com/stevefortier/powerbutton.git`
 2. Edit the `config.json` file with your own configuration. Put your secret configuration files into a `secrets/` folder you create. You can use the files you find in `secretsExample/` as a starting point.
-3. `sudo docker-compose up`
+3. Edit the `nginx-conf/nginx.conf` file and replace the domains with your own.
+4. `sudo docker-compose up`
 
 **On the machine controlled by the power button**
 1. Log in the AWS machine and copy the `remote/` files directly into the home directory of the ssh user the app will use to control the AWS machine.
