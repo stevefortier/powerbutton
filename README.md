@@ -21,3 +21,5 @@ Here, the app is used to control a minecraft server:
 - [ ] Copy the `remote/` files to the controlled machine files automatically via ssh
 - [ ] Make the `remote/` files accept arguments regarding which app to boot and what is the working directory
 - [ ] Factor the minecraft server polling out from the main app, so the app is completely agnositic about what app it's controlling.
+- [ ] Change the favicon `public/images/favicon.ico` to whatever you want.
+- [ ] Optimize get requests made by client to the server.
